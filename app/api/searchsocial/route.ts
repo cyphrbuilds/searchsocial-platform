@@ -32,26 +32,39 @@ export async function POST(request: NextRequest) {
     console.log(`Method: ${method}`)
     console.log(`API Key (first 10 chars): ${API_KEY.substring(0, 10)}...`)
     
-    const response = await fetch(url, config)
+    // Temporarily disable SSL verification for Railway environment
+    const originalRejectUnauthorized = process.env.NODE_TLS_REJECT_UNAUTHORIZED
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
     
-    console.log(`Response status: ${response.status}`)
-    
-    const responseData = await response.json()
-    
-    if (!response.ok) {
-      console.error(`API request failed: ${response.status} ${response.statusText}`)
-      console.error(`Error response:`, responseData)
+    try {
+      const response = await fetch(url, config)
+      
+      console.log(`Response status: ${response.status}`)
+      
+      const responseData = await response.json()
+      
+      if (!response.ok) {
+        console.error(`API request failed: ${response.status} ${response.statusText}`)
+        console.error(`Error response:`, responseData)
+        return NextResponse.json({
+          success: false,
+          error: responseData.detail || response.statusText,
+          status: response.status
+        }, { status: response.status })
+      }
+      
       return NextResponse.json({
-        success: false,
-        error: responseData.detail || response.statusText,
-        status: response.status
-      }, { status: response.status })
+        success: true,
+        data: responseData
+      })
+    } finally {
+      // Restore original SSL verification setting
+      if (originalRejectUnauthorized !== undefined) {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalRejectUnauthorized
+      } else {
+        delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
+      }
     }
-    
-    return NextResponse.json({
-      success: true,
-      data: responseData
-    })
     
   } catch (error) {
     console.error('API request error:', error)
