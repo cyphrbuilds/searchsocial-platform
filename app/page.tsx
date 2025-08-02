@@ -57,6 +57,8 @@ export default function SearchSocial() {
     console.log('=== CLIENT SIDE ENV DEBUG ===')
     console.log('API Key available:', !!process.env.NEXT_PUBLIC_SEARCHSOCIAL_API_KEY)
     console.log('API Key length:', process.env.NEXT_PUBLIC_SEARCHSOCIAL_API_KEY?.length || 0)
+    console.log('API Key value:', process.env.NEXT_PUBLIC_SEARCHSOCIAL_API_KEY)
+    console.log('All NEXT_PUBLIC env vars:', Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC')))
     console.log('=== END CLIENT DEBUG ===')
   }, [])
 

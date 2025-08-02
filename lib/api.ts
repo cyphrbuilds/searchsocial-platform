@@ -128,44 +128,26 @@ export interface Geolocation {
 // API Service
 export class SearchSocialAPI {
   private static async makeRequest(endpoint: string, options: RequestInit = {}): Promise<unknown> {
-    const url = `${API_BASE_URL}${endpoint}`
-    
-    const defaultHeaders = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${API_KEY}`,
-    }
-
-    const config: RequestInit = {
-      ...options,
+    // Use server-side API route instead of direct client-side calls
+    const response = await fetch('/api/searchsocial', {
+      method: 'POST',
       headers: {
-        ...defaultHeaders,
-        ...options.headers,
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        endpoint,
+        method: options.method || 'GET',
+        data: options.body ? JSON.parse(options.body as string) : undefined
+      })
+    })
+    
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorData.error}`)
     }
 
-    try {
-      console.log(`Making API request to: ${url}`)
-      console.log(`API Key (first 10 chars): ${API_KEY.substring(0, 10)}...`)
-      
-      const response = await fetch(url, config)
-      
-      console.log(`Response status: ${response.status}`)
-      console.log(`Response headers:`, Object.fromEntries(response.headers.entries()))
-      
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error(`API request failed: ${response.status} ${response.statusText}`)
-        console.error(`Error response:`, errorText)
-        throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`)
-      }
-
-      const data = await response.json()
-      return data
-    } catch (error) {
-      console.error('API request error:', error)
-      throw error
-    }
+    const data = await response.json()
+    return data.data // Return the actual API response data
   }
 
   static async getInterests(): Promise<InterestsResponse> {
