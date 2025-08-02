@@ -1,4 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import https from 'node:https'
+
+interface ApiResponse {
+  ok: boolean
+  status: number
+  statusText: string
+  json: () => Promise<any>
+}
 
 export async function POST(request: NextRequest) {
   const API_KEY = process.env.NEXT_PUBLIC_SEARCHSOCIAL_API_KEY
@@ -16,55 +24,79 @@ export async function POST(request: NextRequest) {
     
     const url = `https://searchsocial.ai/api/v1${endpoint}`
     
-    const config: RequestInit = {
-      method,
-      headers: {
-        'Authorization': `Bearer ${API_KEY}`,
-        'Content-Type': 'application/json',
-      }
-    }
-    
-    if (data && method !== 'GET') {
-      config.body = JSON.stringify(data)
-    }
-    
     console.log(`Making API request to: ${url}`)
     console.log(`Method: ${method}`)
     console.log(`API Key (first 10 chars): ${API_KEY.substring(0, 10)}...`)
     
-    // Temporarily disable SSL verification for Railway environment
-    const originalRejectUnauthorized = process.env.NODE_TLS_REJECT_UNAUTHORIZED
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-    
-    try {
-      const response = await fetch(url, config)
+    // Use node:https with SSL certificate handling
+    const response: ApiResponse = await new Promise((resolve, reject) => {
+      const urlObj = new URL(url)
       
-      console.log(`Response status: ${response.status}`)
-      
-      const responseData = await response.json()
-      
-      if (!response.ok) {
-        console.error(`API request failed: ${response.status} ${response.statusText}`)
-        console.error(`Error response:`, responseData)
-        return NextResponse.json({
-          success: false,
-          error: responseData.detail || response.statusText,
-          status: response.status
-        }, { status: response.status })
+      const options = {
+        hostname: urlObj.hostname,
+        port: urlObj.port || 443,
+        path: urlObj.pathname + urlObj.search,
+        method: method,
+        headers: {
+          'Authorization': `Bearer ${API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        // Disable SSL certificate verification for Railway
+        rejectUnauthorized: false,
+        strictSSL: false
       }
       
-      return NextResponse.json({
-        success: true,
-        data: responseData
+      const req = https.request(options, (res) => {
+        let data = ''
+        
+        res.on('data', (chunk) => {
+          data += chunk
+        })
+        
+        res.on('end', () => {
+          try {
+            const jsonData = JSON.parse(data)
+            resolve({
+              ok: (res.statusCode || 0) >= 200 && (res.statusCode || 0) < 300,
+              status: res.statusCode || 500,
+              statusText: res.statusMessage || 'Unknown error',
+              json: () => Promise.resolve(jsonData)
+            })
+          } catch (error) {
+            reject(new Error(`Failed to parse response: ${error}`))
+          }
+        })
       })
-    } finally {
-      // Restore original SSL verification setting
-      if (originalRejectUnauthorized !== undefined) {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalRejectUnauthorized
-      } else {
-        delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
+      
+      req.on('error', (error) => {
+        reject(error)
+      })
+      
+      if (data && method !== 'GET') {
+        req.write(JSON.stringify(data))
       }
+      
+      req.end()
+    })
+    
+    console.log(`Response status: ${response.status}`)
+    
+    const responseData = await response.json()
+    
+    if (!response.ok) {
+      console.error(`API request failed: ${response.status} ${response.statusText}`)
+      console.error(`Error response:`, responseData)
+      return NextResponse.json({
+        success: false,
+        error: responseData.detail || response.statusText,
+        status: response.status
+      }, { status: response.status })
     }
+    
+    return NextResponse.json({
+      success: true,
+      data: responseData
+    })
     
   } catch (error) {
     console.error('API request error:', error)
