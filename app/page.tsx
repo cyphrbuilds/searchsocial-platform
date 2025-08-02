@@ -60,6 +60,34 @@ export default function SearchSocial() {
     console.log('=== END CLIENT DEBUG ===')
   }, [])
 
+  // Test API function
+  const testAPI = async () => {
+    console.log('=== TESTING API ===')
+    try {
+      const response = await fetch('https://searchsocial.ai/api/v1/social/interests?hide_deprecated=true', {
+        headers: {
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SEARCHSOCIAL_API_KEY}`,
+          'Content-Type': 'application/json',
+        }
+      })
+      
+      console.log('Response status:', response.status)
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
+      
+      const data = await response.json()
+      console.log('Response data:', data)
+      
+      if (!response.ok) {
+        console.error('API request failed:', response.status, response.statusText)
+        console.error('Error data:', data)
+      } else {
+        console.log('API request successful!')
+      }
+    } catch (error) {
+      console.error('API test error:', error)
+    }
+  }
+
   const {
     influencers,
     favorites,
@@ -287,6 +315,13 @@ export default function SearchSocial() {
                 <p className="text-red-700 text-sm">{error}</p>
               </div>
             )}
+            {/* Debug button - remove in production */}
+            <button 
+              onClick={testAPI}
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded text-sm"
+            >
+              Test API (Debug)
+            </button>
           </div>
 
           {/* Loading State */}
