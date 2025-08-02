@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Navigation } from "@/components/Navigation"
 import { InfluencerCard } from "@/components/InfluencerCard"
 import { ErrorBoundary } from "@/components/ErrorBoundary"
-import { LoadingSpinner } from "@/components/LoadingSpinner"
+import { LoadingSpinner, LoadingCard } from "@/components/LoadingSpinner"
 import { InterestsFilter } from "@/components/InterestsFilter"
 import { LanguagesFilter } from "@/components/LanguagesFilter"
 import { GeolocationFilter } from "@/components/GeolocationFilter"
@@ -245,6 +245,23 @@ export default function SearchSocial() {
                 onGeolocationQueryChange={setGeolocationQuery}
                 loading={geolocationsLoading}
               />
+              {(filters.interests.length > 0 || filters.languages.length > 0 || filters.geolocations.length > 0 || 
+                filters.minFollowers || filters.maxFollowers || filters.minEngagementRate || filters.maxEngagementRate) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    updateFilter("platform", "All Platforms")
+                    filters.interests.forEach(interestId => updateInterests(interestId, false))
+                    filters.languages.forEach(langCode => updateLanguages(langCode, false))
+                    filters.geolocations.forEach(geoId => updateGeolocations(geoId, false))
+                    setSearchQuery("")
+                  }}
+                  className="h-8 border-gray-300 text-gray-700 hover:bg-white bg-transparent"
+                >
+                  Clear All Filters
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -266,8 +283,10 @@ export default function SearchSocial() {
 
           {/* Loading State */}
           {loading && influencers.length === 0 && (
-            <div className="flex justify-center items-center py-12">
-              <LoadingSpinner />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, i) => (
+                <LoadingCard key={i} />
+              ))}
             </div>
           )}
 
@@ -328,17 +347,6 @@ export default function SearchSocial() {
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <DialogTitle className="text-2xl sm:text-3xl font-bold text-black flex items-center flex-wrap gap-2">
                       {selectedInfluencer.name}
-                      {selectedInfluencer.verified && (
-                        <div className="w-5 h-5 sm:w-6 sm:h-6 bg-black rounded-full flex items-center justify-center">
-                          <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                      )}
                     </DialogTitle>
                     <Button
                       onClick={downloadReport}

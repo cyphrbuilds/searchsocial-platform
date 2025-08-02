@@ -1,5 +1,5 @@
 const API_BASE_URL = 'https://searchsocial.ai/api/v1'
-const API_KEY = 'sk-TNm581289-dEcVslzme2KKge9PaUockQsKtwFeg2jak'
+const API_KEY = process.env.NEXT_PUBLIC_SEARCHSOCIAL_API_KEY || ''
 
 // API Response Types
 export interface APIUser {
@@ -210,7 +210,7 @@ export function convertAPIInfluencerToInternal(apiInfluencer: APIInfluencer) {
     language: "English", // Default language
     age: "18-34", // Default age group
     responseTime: "2-4 hours", // Default response time
-    badges: user.is_verified ? ["Verified"] : [],
+    badges: [],
     recentPosts: [], // API doesn't provide recent posts
     audienceAge: { "18-24": 30, "25-34": 40, "35-44": 20, "45+": 10 },
     audienceGender: { "male": 45, "female": 55 },

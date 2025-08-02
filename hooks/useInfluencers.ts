@@ -26,6 +26,23 @@ export function useInfluencers() {
   const [geolocationsLoading, setGeolocationsLoading] = useState(false)
   const [geolocationQuery, setGeolocationQuery] = useState("")
   const [debouncedGeolocationQuery, setDebouncedGeolocationQuery] = useState("")
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("")
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery)
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  // Auto-search when debounced query changes
+  useEffect(() => {
+    if (debouncedSearchQuery.trim()) {
+      performSearch()
+    }
+  }, [debouncedSearchQuery])
 
   // Fetch interests on component mount
   useEffect(() => {
@@ -37,9 +54,11 @@ export function useInfluencers() {
           setInterests(response.interests)
         } else {
           console.error("Failed to fetch interests:", response.message)
+          setError("Failed to load interests. Please try again.")
         }
       } catch (err) {
         console.error("Error fetching interests:", err)
+        setError("Network error loading interests. Please check your connection.")
       } finally {
         setInterestsLoading(false)
       }
@@ -58,9 +77,11 @@ export function useInfluencers() {
           setLanguages(response.languages)
         } else {
           console.error("Failed to fetch languages:", response.message)
+          setError("Failed to load languages. Please try again.")
         }
       } catch (err) {
         console.error("Error fetching languages:", err)
+        setError("Network error loading languages. Please check your connection.")
       } finally {
         setLanguagesLoading(false)
       }

@@ -32,12 +32,15 @@ export interface Influencer {
   rating: number
   avgLikes: number
   avgComments: number
+  avgShares?: number
   postCount?: number
   category: string
   contentType: string
   country: string
   language: string
   age: string
+  gender?: string
+  ethnicity?: string
   responseTime: string
   badges: string[]
   recentPosts: RecentPost[]

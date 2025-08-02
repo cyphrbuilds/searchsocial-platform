@@ -1,6 +1,6 @@
 "use client"
 
-import { Heart, MapPin } from "lucide-react"
+import { Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -126,17 +126,7 @@ export function InfluencerCard({
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-gray-600">
-        <div className="flex items-center gap-1">
-          <MapPin className="h-3 w-3" />
-          <span>{influencer.country}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span>{getContentTypeIcon(influencer.contentType)}</span>
-          <span>{influencer.contentType}</span>
-        </div>
-      </div>
+
     </div>
   )
 } 
