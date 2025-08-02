@@ -1,6 +1,14 @@
 const API_BASE_URL = 'https://searchsocial.ai/api/v1'
 const API_KEY = process.env.NEXT_PUBLIC_SEARCHSOCIAL_API_KEY || ''
 
+// Debug environment variables in production
+console.log('=== ENVIRONMENT DEBUG ===')
+console.log('NODE_ENV:', process.env.NODE_ENV)
+console.log('API_KEY length:', API_KEY.length)
+console.log('API_KEY first 10 chars:', API_KEY.substring(0, 10))
+console.log('All env vars starting with NEXT_PUBLIC:', Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC')))
+console.log('=== END DEBUG ===')
+
 // Check if API key is available
 if (!API_KEY) {
   console.error('NEXT_PUBLIC_SEARCHSOCIAL_API_KEY is not set. Please check your environment variables.')

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -51,6 +51,14 @@ export default function SearchSocial() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [selectedInfluencer, setSelectedInfluencer] = useState<Influencer | null>(null)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+
+  // Debug environment variables on client side
+  useEffect(() => {
+    console.log('=== CLIENT SIDE ENV DEBUG ===')
+    console.log('API Key available:', !!process.env.NEXT_PUBLIC_SEARCHSOCIAL_API_KEY)
+    console.log('API Key length:', process.env.NEXT_PUBLIC_SEARCHSOCIAL_API_KEY?.length || 0)
+    console.log('=== END CLIENT DEBUG ===')
+  }, [])
 
   const {
     influencers,
