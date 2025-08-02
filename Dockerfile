@@ -11,8 +11,8 @@ RUN npm ci --legacy-peer-deps
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Install SWC dependencies and build the application
+RUN npm install && npm run build
 
 # Expose port
 EXPOSE 3000
