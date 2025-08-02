@@ -1,6 +1,11 @@
 const API_BASE_URL = 'https://searchsocial.ai/api/v1'
 const API_KEY = process.env.NEXT_PUBLIC_SEARCHSOCIAL_API_KEY || ''
 
+// Check if API key is available
+if (!API_KEY) {
+  console.error('NEXT_PUBLIC_SEARCHSOCIAL_API_KEY is not set. Please check your environment variables.')
+}
+
 // API Response Types
 export interface APIUser {
   user_id: string
@@ -132,10 +137,19 @@ export class SearchSocialAPI {
     }
 
     try {
+      console.log(`Making API request to: ${url}`)
+      console.log(`API Key (first 10 chars): ${API_KEY.substring(0, 10)}...`)
+      
       const response = await fetch(url, config)
       
+      console.log(`Response status: ${response.status}`)
+      console.log(`Response headers:`, Object.fromEntries(response.headers.entries()))
+      
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status} ${response.statusText}`)
+        const errorText = await response.text()
+        console.error(`API request failed: ${response.status} ${response.statusText}`)
+        console.error(`Error response:`, errorText)
+        throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`)
       }
 
       const data = await response.json()
